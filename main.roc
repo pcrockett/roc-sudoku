@@ -111,6 +111,16 @@ to_eliminate = |cells|
     |> List.map(|c| List.len(c.candidates) - 1)
     |> List.sum
 
+expect
+    to_eliminate(
+        [
+            { candidates: [1, 2, 3] },
+            { candidates: [4] },
+            { candidates: [5, 6, 7, 8] },
+        ],
+    )
+    == 5
+
 is_known = |cell| List.len(cell.candidates) == 1
 
 expect is_known({ candidates: [1] })

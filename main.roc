@@ -3,28 +3,15 @@ app [main!] { cli: platform "https://github.com/roc-lang/basic-cli/releases/down
 import cli.Stdout
 import cli.Arg exposing [Arg]
 
+Board : { rows : List Row }
+Row : List Cell
+Cell : { candidates : List U8 }
+
 main! : List Arg => Result {} _
 main! = |_args|
-    board = new_board(
-        [
-            [3, 0, 0, 1, 0, 0, 8, 0, 5],
-            [0, 0, 0, 9, 0, 0, 7, 2, 0],
-            [0, 0, 6, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 8],
-            [0, 2, 0, 4, 8, 7, 0, 0, 0],
-            [0, 7, 0, 0, 0, 1, 0, 0, 0],
-            [2, 3, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 5, 0, 0, 9, 0, 4, 0],
-            [4, 0, 0, 0, 0, 0, 2, 0, 1],
-        ],
-    )
-
-    render_board(board)
+    new_board
+    |> render_board
     |> Stdout.line!
-
-Cell : { candidates : List U8 }
-Row : List Cell
-Board : { rows : List Row }
 
 render_board = |board|
     List.map(board.rows, render_row)
@@ -40,9 +27,26 @@ render_cell = |cell|
         { candidates: [] } -> "!"
         _ -> "?"
 
-new_board : List List U8 -> Board
-new_board = |rows| {
-    rows: List.map(rows, new_row),
+new_board : Board
+new_board = {
+    # i would move this hard-coded board up to the main function and take it as a
+    # parameter here, however that for some reason triggers a panic in the compiler.
+    # there are plenty of other similar panics in the open issues on the roc repo, so i
+    # think it's safe to assume it'll be fixed in time.
+    rows: List.map(
+        [
+            [3, 0, 0, 1, 0, 0, 8, 0, 5],
+            [0, 0, 0, 9, 0, 0, 7, 2, 0],
+            [0, 0, 6, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 8],
+            [0, 2, 0, 4, 8, 7, 0, 0, 0],
+            [0, 7, 0, 0, 0, 1, 0, 0, 0],
+            [2, 3, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 5, 0, 0, 9, 0, 4, 0],
+            [4, 0, 0, 0, 0, 0, 2, 0, 1],
+        ],
+        new_row,
+    ),
 }
 
 new_row : List U8 -> Row

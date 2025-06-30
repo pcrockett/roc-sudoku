@@ -1,7 +1,7 @@
 module [
     Cell,
-    new,
     is_known,
+    new,
     to_str,
 ]
 

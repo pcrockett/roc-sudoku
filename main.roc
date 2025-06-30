@@ -3,9 +3,9 @@ app [main!] { cli: platform "https://github.com/roc-lang/basic-cli/releases/down
 import cli.Stdout
 import cli.Arg exposing [Arg]
 import Cell exposing [Cell]
+import Row exposing [Row]
 
 Board : { rows : List Row }
-Row : List Cell
 Transform : Board -> Board
 
 main! : List Arg => Result {} _
@@ -43,21 +43,10 @@ render_board = |board|
     |> List.map_with_index(
         |row, index|
             when index is
-                3 | 6 -> "─────┼─────┼─────\n${render_row(row)}"
-                _ -> render_row(row),
+                3 | 6 -> "─────┼─────┼─────\n${Row.to_str(row)}"
+                _ -> Row.to_str(row),
     )
     |> Str.join_with("\n")
-
-render_row = |row|
-    row
-    |> List.map_with_index(
-        |cell, index|
-            when index is
-                0 -> Cell.to_str(cell)
-                3 | 6 -> "│${Cell.to_str(cell)}"
-                _ -> " ${Cell.to_str(cell)}",
-    )
-    |> Str.join_with("")
 
 new_board : Board
 new_board = {
@@ -77,12 +66,9 @@ new_board = {
             [0, 0, 5, 0, 0, 9, 0, 4, 0],
             [4, 0, 0, 0, 0, 0, 2, 0, 1],
         ],
-        new_row,
+        Row.new,
     ),
 }
-
-new_row : List U8 -> Row
-new_row = |values| List.map(values, Cell.new)
 
 all_cells : List Row -> List Cell
 all_cells = |rows|
@@ -104,41 +90,13 @@ expect
     )
     == 5
 
-eliminate_candidates : List Cell, List U8 -> List Cell
-eliminate_candidates = |cells, knowns|
-    List.map(
-        cells,
-        |cell|
-            if Cell.is_known(cell) then
-                cell
-            else
-                {
-                    candidates: cell.candidates |> List.drop_if(|v| List.contains(knowns, v)),
-                },
-    )
-
-known_values : List Cell -> List U8
-known_values = |cells|
-    cells
-    |> List.keep_if(Cell.is_known)
-    |> List.map(|c| List.first(c.candidates) ?? crash "Found no candidates in known_values")
-
-expect
-    known_values(
-        [
-            { candidates: [1, 2, 3] },
-            { candidates: [2] },
-            { candidates: [5] },
-            { candidates: [4, 6] },
-        ],
-    )
-    == [2, 5]
-
 unique_in_row : Transform
 unique_in_row = |board| {
     rows: board.rows
     |> List.map(
-        |row| eliminate_candidates(row, known_values(row)),
+        |row|
+            known_values = Row.known_values(row)
+            row |> Row.eliminate_candidates(known_values),
     ),
 }
 

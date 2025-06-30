@@ -1,4 +1,4 @@
-all: clean build
+all: clean build test
 .PHONY: all
 
 clean:

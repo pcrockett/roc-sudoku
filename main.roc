@@ -9,8 +9,18 @@ Cell : { candidates : List U8 }
 
 main! : List Arg => Result {} _
 main! = |_args|
-    new_board
+    board = new_board
+
+    board
     |> render_board
+    |> Stdout.line!?
+
+    Stdout.write!("\nCandidates left to eliminate: ")?
+
+    board.rows
+    |> all_cells
+    |> to_eliminate
+    |> Num.to_str
     |> Stdout.line!
 
 render_board = |board|
@@ -75,3 +85,15 @@ empty_cell : Cell
 empty_cell = {
     candidates: List.range({ start: At(1), end: At(9), step: 1 }),
 }
+
+all_cells : List Row -> List Cell
+all_cells = |rows|
+    List.join_map(rows, |r| r)
+
+to_eliminate : List Cell -> U64
+to_eliminate = |cells|
+    total_candidates =
+        cells
+        |> List.map(|c| List.len(c.candidates))
+        |> List.sum
+    total_candidates - 81

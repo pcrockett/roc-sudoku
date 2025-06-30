@@ -2,10 +2,10 @@ app [main!] { cli: platform "https://github.com/roc-lang/basic-cli/releases/down
 
 import cli.Stdout
 import cli.Arg exposing [Arg]
+import Cell exposing [Cell]
 
 Board : { rows : List Row }
 Row : List Cell
-Cell : { candidates : List U8 }
 Transform : Board -> Board
 
 main! : List Arg => Result {} _
@@ -53,17 +53,11 @@ render_row = |row|
     |> List.map_with_index(
         |cell, index|
             when index is
-                0 -> render_cell(cell)
-                3 | 6 -> "│${render_cell(cell)}"
-                _ -> " ${render_cell(cell)}",
+                0 -> Cell.to_str(cell)
+                3 | 6 -> "│${Cell.to_str(cell)}"
+                _ -> " ${Cell.to_str(cell)}",
     )
     |> Str.join_with("")
-
-render_cell = |cell|
-    when cell is
-        { candidates: [single] } -> Num.to_str(single)
-        { candidates: [] } -> crash "Found no candidates in render_cell"
-        _ -> "·"
 
 new_board : Board
 new_board = {
@@ -88,18 +82,7 @@ new_board = {
 }
 
 new_row : List U8 -> Row
-new_row = |values| List.map(values, new_cell)
-
-new_cell : U8 -> Cell
-new_cell = |value|
-    when value is
-        0 -> empty_cell
-        v -> { candidates: [v] }
-
-empty_cell : Cell
-empty_cell = {
-    candidates: List.range({ start: At(1), end: At(9), step: 1 }),
-}
+new_row = |values| List.map(values, Cell.new)
 
 all_cells : List Row -> List Cell
 all_cells = |rows|
@@ -121,15 +104,23 @@ expect
     )
     == 5
 
-is_known = |cell| List.len(cell.candidates) == 1
-
-expect is_known({ candidates: [1] })
-expect !is_known({ candidates: [1, 2] })
+eliminate_candidates : List Cell, List U8 -> List Cell
+eliminate_candidates = |cells, knowns|
+    List.map(
+        cells,
+        |cell|
+            if Cell.is_known(cell) then
+                cell
+            else
+                {
+                    candidates: cell.candidates |> List.drop_if(|v| List.contains(knowns, v)),
+                },
+    )
 
 known_values : List Cell -> List U8
 known_values = |cells|
     cells
-    |> List.keep_if(is_known)
+    |> List.keep_if(Cell.is_known)
     |> List.map(|c| List.first(c.candidates) ?? crash "Found no candidates in known_values")
 
 expect
@@ -142,19 +133,6 @@ expect
         ],
     )
     == [2, 5]
-
-eliminate_candidates : List Cell, List U8 -> List Cell
-eliminate_candidates = |cells, knowns|
-    List.map(
-        cells,
-        |cell|
-            if is_known(cell) then
-                cell
-            else
-                {
-                    candidates: cell.candidates |> List.drop_if(|v| List.contains(knowns, v)),
-                },
-    )
 
 unique_in_row : Transform
 unique_in_row = |board| {

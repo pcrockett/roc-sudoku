@@ -14,18 +14,31 @@ main! = |_args|
     |> Stdout.line!
 
 render_board = |board|
-    List.map(board.rows, render_row)
+    board.rows
+    |> List.map_with_index(
+        |row, index|
+            when index is
+                3 | 6 -> "─────┼─────┼─────\n${render_row(row)}"
+                _ -> render_row(row),
+    )
     |> Str.join_with("\n")
 
 render_row = |row|
-    List.map(row, render_cell)
-    |> Str.join_with(" ")
+    row
+    |> List.map_with_index(
+        |cell, index|
+            when index is
+                0 -> render_cell(cell)
+                3 | 6 -> "│${render_cell(cell)}"
+                _ -> " ${render_cell(cell)}",
+    )
+    |> Str.join_with("")
 
 render_cell = |cell|
     when cell is
         { candidates: [single] } -> Num.to_str(single)
         { candidates: [] } -> "!"
-        _ -> "?"
+        _ -> "·"
 
 new_board : Board
 new_board = {

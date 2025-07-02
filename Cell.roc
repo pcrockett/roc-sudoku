@@ -7,7 +7,7 @@ module [
     to_str,
 ]
 
-Cell := { candidates : List U8 } implements [Eq, Hash]
+Cell := { candidates : List U8 } implements [Eq, Hash, Inspect]
 
 new : List U8 -> Cell
 new = |candidate_values| @Cell({ candidates: candidate_values })

@@ -16,6 +16,6 @@ test: build
 	roc test
 .PHONY: test
 
-build/main: main.roc
+build/main: *.roc
 	mkdir -p build
 	roc build --output build/

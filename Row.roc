@@ -10,7 +10,7 @@ module [
 
 import Cell exposing [Cell]
 
-Row := List Cell implements [Eq]
+Row := List Cell implements [Eq, Inspect]
 
 new : List Cell -> Row
 new = |cell_list| @Row(cell_list)

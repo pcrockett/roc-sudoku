@@ -49,8 +49,15 @@ main! = |_args|
         |> Board.cells
         |> to_eliminate
         |> Num.to_str
+    Stdout.line!("\nCandidates left to eliminate: ${cells_to_eliminate}")?
 
-    Stdout.line!("\nCandidates left to eliminate: ${cells_to_eliminate}")
+    known_cells =
+        transformed_board
+        |> Board.cells
+        |> List.keep_if(|c| Cell.is_known(c))
+        |> List.len
+        |> Num.to_str
+    Stdout.line!("Solved cells: ${known_cells}")
 
 to_eliminate : List Cell -> U64
 to_eliminate = |cells|

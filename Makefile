@@ -9,6 +9,7 @@ build: build/main
 .PHONY: build
 
 run: build
+	@echo
 	@./build/main
 .PHONY: run
 

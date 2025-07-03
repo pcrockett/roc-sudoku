@@ -3,7 +3,7 @@ app [main!] { cli: platform "https://github.com/roc-lang/basic-cli/releases/down
 import cli.Stdout
 import cli.Arg exposing [Arg]
 import Cell exposing [Cell]
-import Row
+import Group
 import Board exposing [Board]
 
 Transform : Board -> Board
@@ -22,7 +22,7 @@ main! = |_args|
             [0, 0, 5, 0, 0, 9, 0, 4, 0],
             [4, 0, 0, 0, 0, 0, 2, 0, 1],
         ]
-        |> List.map(Row.from_values)
+        |> List.map(Group.from_values)
         |> Board.new
 
     transforms : List Transform
@@ -81,8 +81,8 @@ unique_in_row = |board|
     |> Board.rows
     |> List.map(
         |row|
-            known_values = Row.known_values(row)
-            row |> Row.eliminate_candidates(known_values),
+            known_values = Group.known_values(row)
+            row |> Group.eliminate_candidates(known_values),
     )
     |> Board.new
 
@@ -92,8 +92,8 @@ unique_in_col = |board|
     |> Board.cols
     |> List.map(
         |col|
-            known_values = Row.known_values(col)
-            col |> Row.eliminate_candidates(known_values),
+            known_values = Group.known_values(col)
+            col |> Group.eliminate_candidates(known_values),
     )
     |> Board.new
 
@@ -103,21 +103,21 @@ unique_in_col = |board|
 # expect
 #     Board.new(
 #         [
-#             Row.from_values([4, 0, 3]),
-#             Row.from_values([3, 0]),
+#             Group.from_values([4, 0, 3]),
+#             Group.from_values([3, 0]),
 #         ],
 #     )
 #     |> unique_in_row
 #     == Board.new(
 #         [
-#             Row.new(
+#             Group.new(
 #                 [
 #                     Cell.new([4]),
 #                     Cell.new([1, 2, 5, 6, 7, 8, 9]),
 #                     Cell.new([3]),
 #                 ],
 #             ),
-#             Row.new(
+#             Group.new(
 #                 [
 #                     Cell.new([3]),
 #                     Cell.new([1, 2, 4, 5, 6, 7, 8, 9]),

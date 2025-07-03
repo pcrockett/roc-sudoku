@@ -1,5 +1,5 @@
 module [
-    Row,
+    Group,
     cells,
     eliminate_candidates,
     from_values,
@@ -10,18 +10,18 @@ module [
 
 import Cell exposing [Cell]
 
-Row := List Cell implements [Eq, Inspect]
+Group := List Cell implements [Eq, Inspect]
 
-new : List Cell -> Row
-new = |cell_list| @Row(cell_list)
+new : List Cell -> Group
+new = |cell_list| @Group(cell_list)
 
-from_values : List U8 -> Row
+from_values : List U8 -> Group
 from_values = |values| List.map(values, Cell.from_value) |> new
 
-cells : Row -> List Cell
-cells = |@Row(row)| row
+cells : Group -> List Cell
+cells = |@Group(row)| row
 
-known_values : Row -> List U8
+known_values : Group -> List U8
 known_values = |row|
     row
     |> cells
@@ -48,7 +48,7 @@ expect
     )
     == [2, 5]
 
-eliminate_candidates : Row, List U8 -> Row
+eliminate_candidates : Group, List U8 -> Group
 eliminate_candidates = |row, values|
     row
     |> cells
@@ -77,7 +77,7 @@ expect
         ],
     )
 
-to_str : Row -> Str
+to_str : Group -> Str
 to_str = |row|
     row
     |> cells

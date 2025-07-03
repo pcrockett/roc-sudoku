@@ -19,11 +19,11 @@ from_values : List U8 -> Group
 from_values = |values| List.map(values, Cell.from_value) |> new
 
 cells : Group -> List Cell
-cells = |@Group(row)| row
+cells = |@Group(group)| group
 
 known_values : Group -> List U8
-known_values = |row|
-    row
+known_values = |group|
+    group
     |> cells
     |> List.keep_if(Cell.is_known)
     |> List.map(
@@ -49,8 +49,8 @@ expect
     == [2, 5]
 
 eliminate_candidates : Group, List U8 -> Group
-eliminate_candidates = |row, values|
-    row
+eliminate_candidates = |group, values|
+    group
     |> cells
     |> List.map(
         |cell|
@@ -77,9 +77,11 @@ expect
         ],
     )
 
+# TODO: to_str doesn't belong here anymore. We need a separate presentation layer, maybe
+# call it "Render.roc" and it should know how to put things on screen.
 to_str : Group -> Str
-to_str = |row|
-    row
+to_str = |group|
+    group
     |> cells
     |> List.map_with_index(
         |cell, index|

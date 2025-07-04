@@ -27,9 +27,9 @@ main! = |_args|
 
     transforms : List Transform
     transforms = [
-        unique_in_row,
-        unique_in_col,
-        unique_in_box,
+        unique_in_group(Board.rows),
+        unique_in_group(Board.cols),
+        unique_in_group(Board.boxes),
     ]
 
     transformed_board : Board
@@ -75,38 +75,17 @@ expect
     )
     == 5
 
-unique_in_row : Transform
-unique_in_row = |board|
-    board
-    |> Board.rows
-    |> List.map(
-        |row|
-            known_values = Group.known_values(row)
-            row |> Group.eliminate_candidates(known_values),
-    )
-    |> Board.new
-
-unique_in_col : Transform
-unique_in_col = |board|
-    board
-    |> Board.cols
-    |> List.map(
-        |col|
-            known_values = Group.known_values(col)
-            col |> Group.eliminate_candidates(known_values),
-    )
-    |> Board.new
-
-unique_in_box : Transform
-unique_in_box = |board|
-    board
-    |> Board.boxes
-    |> List.map(
-        |box|
-            known_values = Group.known_values(box)
-            box |> Group.eliminate_candidates(known_values),
-    )
-    |> Board.new
+unique_in_group = |group_func|
+    transform = |board|
+        board
+        |> group_func
+        |> List.map(
+            |grp|
+                known_values = Group.known_values(grp)
+                grp |> Group.eliminate_candidates(known_values),
+        )
+        |> Board.new
+    transform
 
 # TODO: find a more elegant way to test this on a full board
 #       maybe fill missing values with default cells?

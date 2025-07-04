@@ -1,5 +1,7 @@
 module [
     Board,
+    box,
+    boxes,
     cells,
     col,
     cols,
@@ -237,6 +239,83 @@ expect
     · 2 ·│· · ·│· 4 ·
     5 · ·│8 · ·│· · 1
     """
+
+box : Board, U64 -> Group
+box = |@Board(board), index|
+    row_start = (index // 3) * 3
+    col_start = (index % 3) * 3
+    [0, 1, 2]
+    |> List.join_map(
+        |r|
+            [0, 1, 2]
+            |> List.map(
+                |c|
+                    row(@Board(board), row_start + r) |> Group.get(col_start + c),
+            ),
+    )
+    |> Group.new
+
+expect
+    result =
+        [
+            [3, 0, 0, 1, 0, 0, 8, 0, 5],
+            [0, 0, 0, 9, 0, 0, 7, 2, 0],
+            [0, 0, 6, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 8],
+            [0, 2, 0, 4, 8, 7, 0, 0, 0],
+            [0, 7, 0, 0, 0, 1, 0, 0, 0],
+            [2, 3, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 5, 0, 0, 9, 0, 4, 0],
+            [4, 0, 0, 0, 0, 0, 2, 0, 1],
+        ]
+        |> List.map(Group.from_values)
+        |> new
+        |> box(0)
+        |> Group.to_str
+    result == "3 · ·│· · ·│· · 6"
+
+expect
+    result =
+        [
+            [3, 0, 0, 1, 0, 0, 8, 0, 5],
+            [0, 0, 0, 9, 0, 0, 7, 2, 0],
+            [0, 0, 6, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 8],
+            [0, 2, 0, 4, 8, 7, 0, 0, 0],
+            [0, 7, 0, 0, 0, 1, 0, 0, 0],
+            [2, 3, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 5, 0, 0, 9, 0, 4, 0],
+            [4, 0, 0, 0, 0, 0, 2, 0, 1],
+        ]
+        |> List.map(Group.from_values)
+        |> new
+        |> box(5)
+        |> Group.to_str
+    result == "· · 8│· · ·│· · ·"
+
+expect
+    result =
+        [
+            [3, 0, 0, 1, 0, 0, 8, 0, 5],
+            [0, 0, 0, 9, 0, 0, 7, 2, 0],
+            [0, 0, 6, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 8],
+            [0, 2, 0, 4, 8, 7, 0, 0, 0],
+            [0, 7, 0, 0, 0, 1, 0, 0, 0],
+            [2, 3, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 5, 0, 0, 9, 0, 4, 0],
+            [4, 0, 0, 0, 0, 0, 2, 0, 1],
+        ]
+        |> List.map(Group.from_values)
+        |> new
+        |> box(8)
+        |> Group.to_str
+    result == "· · ·│· 4 ·│2 · 1"
+
+boxes : Board -> List Group
+boxes = |board|
+    List.range({ start: At(0), end: Before(board_size), step: 1 })
+    |> List.map(|i| box(board, i))
 
 cells : Board -> List Cell
 cells = |board|

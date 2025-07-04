@@ -27,9 +27,9 @@ main! = |_args|
 
     transforms : List Transform
     transforms = [
-        # TODO: `unique_in_box`
         unique_in_row,
         unique_in_col,
+        unique_in_box,
     ]
 
     transformed_board : Board
@@ -94,6 +94,17 @@ unique_in_col = |board|
         |col|
             known_values = Group.known_values(col)
             col |> Group.eliminate_candidates(known_values),
+    )
+    |> Board.new
+
+unique_in_box : Transform
+unique_in_box = |board|
+    board
+    |> Board.boxes
+    |> List.map(
+        |box|
+            known_values = Group.known_values(box)
+            box |> Group.eliminate_candidates(known_values),
     )
     |> Board.new
 

@@ -3,6 +3,7 @@ module [
     cells,
     eliminate_candidates,
     from_values,
+    get,
     known_values,
     new,
     to_str,
@@ -17,6 +18,10 @@ new = |cell_list| @Group(cell_list)
 
 from_values : List U8 -> Group
 from_values = |values| List.map(values, Cell.from_value) |> new
+
+get : Group, U64 -> Cell
+get = |@Group(group), index|
+    List.get(group, index) ?? crash "Index out of bounds"
 
 cells : Group -> List Cell
 cells = |@Group(group)| group

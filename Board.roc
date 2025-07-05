@@ -5,7 +5,8 @@ module [
     cells,
     col,
     cols,
-    new,
+    from_cols,
+    from_rows,
     row,
     rows,
     to_str,
@@ -18,11 +19,56 @@ board_size = 9
 
 Board := { cells : List Cell } implements [Eq]
 
-new : List Group -> Board
-new = |rows_list|
+from_rows : List Group -> Board
+from_rows = |rows_list|
     @Board(
         { cells: rows_list |> List.join_map(|r| r |> Group.cells) },
     )
+
+from_cols : List Group -> Board
+from_cols = |cols_list|
+    @Board(
+        {
+            cells: List.range({ start: At(0), end: At(8), step: 1 })
+            |> List.join_map(
+                |index|
+                    cols_list
+                    |> List.map(
+                        |c| Group.get(c, index),
+                    ),
+            ),
+        },
+    )
+
+expect
+    [
+        [1, 1, 1, 2, 2, 2, 3, 3, 3],
+        [4, 4, 4, 5, 5, 5, 6, 6, 6],
+        [7, 7, 7, 8, 8, 8, 9, 9, 9],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ]
+    |> List.map(Group.from_values)
+    |> from_cols
+    |> to_str
+    ==
+    """
+    1 4 7│· · ·│· · ·
+    1 4 7│· · ·│· · ·
+    1 4 7│· · ·│· · ·
+    ─────┼─────┼─────
+    2 5 8│· · ·│· · ·
+    2 5 8│· · ·│· · ·
+    2 5 8│· · ·│· · ·
+    ─────┼─────┼─────
+    3 6 9│· · ·│· · ·
+    3 6 9│· · ·│· · ·
+    3 6 9│· · ·│· · ·
+    """
 
 row : Board, U64 -> Group
 row = |@Board(board), index|
@@ -52,7 +98,7 @@ expect
             [4, 0, 0, 0, 0, 0, 2, 0, 1],
         ]
         |> List.map(Group.from_values)
-        |> new
+        |> from_rows
         |> row(0)
         |> Group.to_str
     result == "3 · ·│1 · ·│8 · 5"
@@ -71,7 +117,7 @@ expect
             [4, 0, 0, 0, 0, 0, 2, 0, 1],
         ]
         |> List.map(Group.from_values)
-        |> new
+        |> from_rows
         |> row(5)
         |> Group.to_str
     result == "· 7 ·│· · 1│· · ·"
@@ -90,7 +136,7 @@ expect
             [4, 0, 0, 0, 0, 0, 2, 0, 1],
         ]
         |> List.map(Group.from_values)
-        |> new
+        |> from_rows
         |> row(8)
         |> Group.to_str
     result == "4 · ·│· · ·│2 · 1"
@@ -114,7 +160,7 @@ expect
             [4, 0, 0, 0, 0, 0, 2, 0, 1],
         ]
         |> List.map(Group.from_values)
-        |> new
+        |> from_rows
         |> rows
         |> List.map(|r| Group.to_str(r))
         |> Str.join_with("\n")
@@ -160,7 +206,7 @@ expect
             [4, 0, 0, 0, 0, 0, 2, 0, 1],
         ]
         |> List.map(Group.from_values)
-        |> new
+        |> from_rows
         |> col(0)
         |> Group.to_str
     result == "3 · ·│· · ·│2 · 4"
@@ -179,7 +225,7 @@ expect
             [4, 0, 0, 0, 0, 0, 2, 0, 1],
         ]
         |> List.map(Group.from_values)
-        |> new
+        |> from_rows
         |> col(5)
         |> Group.to_str
     result == "· · ·│· 7 1│· 9 ·"
@@ -198,7 +244,7 @@ expect
             [4, 0, 0, 0, 0, 0, 2, 0, 1],
         ]
         |> List.map(Group.from_values)
-        |> new
+        |> from_rows
         |> col(8)
         |> Group.to_str
     result == "5 · ·│8 · ·│· · 1"
@@ -222,7 +268,7 @@ expect
             [4, 0, 0, 0, 0, 0, 2, 0, 1],
         ]
         |> List.map(Group.from_values)
-        |> new
+        |> from_rows
         |> cols
         |> List.map(|r| Group.to_str(r))
         |> Str.join_with("\n")
@@ -269,7 +315,7 @@ expect
             [4, 0, 0, 0, 0, 0, 2, 0, 1],
         ]
         |> List.map(Group.from_values)
-        |> new
+        |> from_rows
         |> box(0)
         |> Group.to_str
     result == "3 · ·│· · ·│· · 6"
@@ -288,7 +334,7 @@ expect
             [4, 0, 0, 0, 0, 0, 2, 0, 1],
         ]
         |> List.map(Group.from_values)
-        |> new
+        |> from_rows
         |> box(5)
         |> Group.to_str
     result == "· · 8│· · ·│· · ·"
@@ -307,7 +353,7 @@ expect
             [4, 0, 0, 0, 0, 0, 2, 0, 1],
         ]
         |> List.map(Group.from_values)
-        |> new
+        |> from_rows
         |> box(8)
         |> Group.to_str
     result == "· · ·│· 4 ·│2 · 1"

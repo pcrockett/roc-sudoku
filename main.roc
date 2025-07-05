@@ -23,7 +23,7 @@ main! = |_args|
             [4, 0, 0, 0, 0, 0, 2, 0, 1],
         ]
         |> List.map(Group.from_values)
-        |> Board.new
+        |> Board.from_rows
 
     Stdout.line!(Board.to_str(board))?
 
@@ -31,9 +31,9 @@ main! = |_args|
 
     transforms : List Transform
     transforms = [
-        unique_in_group(Board.rows),
-        unique_in_group(Board.cols),
-        unique_in_group(Board.boxes),
+        unique_in_group(Board.rows, Board.from_rows),
+        unique_in_group(Board.cols, Board.from_cols),
+        # unique_in_group(Board.boxes),
     ]
 
     transformed_board : Board
@@ -79,7 +79,7 @@ expect
     )
     == 5
 
-unique_in_group = |group_func|
+unique_in_group = |group_func, reassemble_func|
     transform = |board|
         board
         |> group_func
@@ -88,7 +88,7 @@ unique_in_group = |group_func|
                 known_values = Group.known_values(grp)
                 grp |> Group.eliminate_candidates(known_values),
         )
-        |> Board.new
+        |> reassemble_func
     transform
 
 expect
@@ -105,7 +105,7 @@ expect
             [4, 0, 0, 0, 0, 0, 2, 0, 1],
         ]
         |> List.map(Group.from_values)
-        |> Board.new
+        |> Board.from_rows
 
     # none of these transforms should be able to solve the board; they just eliminate
     # candidates. so the string representation of the board should be identical for all
@@ -125,9 +125,14 @@ expect
         4 · ·│· · ·│2 · 1
         """
 
-    transforms = [Board.rows, Board.cols, Board.boxes] |> List.map(unique_in_group)
+    transforms = [
+        unique_in_group(Board.rows, Board.from_rows),
+        unique_in_group(Board.cols, Board.from_cols),
+        # unique_in_group(Board.boxes, Board.from_boxes),
+    ]
+
     transforms
     |> List.map(|transform| transform(board))
-    |> List.map(|transformed_board| dbg Board.to_str(transformed_board))
+    |> List.map(Board.to_str)
     |> List.map(|actual| actual == expected)
     |> List.all(|result| result)

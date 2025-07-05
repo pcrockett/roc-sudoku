@@ -25,6 +25,10 @@ main! = |_args|
         |> List.map(Group.from_values)
         |> Board.new
 
+    Stdout.line!(Board.to_str(board))?
+
+    Stdout.line!("\nSolving...\n")?
+
     transforms : List Transform
     transforms = [
         unique_in_group(Board.rows),
@@ -87,31 +91,43 @@ unique_in_group = |group_func|
         |> Board.new
     transform
 
-# TODO: find a more elegant way to test this on a full board
-#       maybe fill missing values with default cells?
-#
-# expect
-#     Board.new(
-#         [
-#             Group.from_values([4, 0, 3]),
-#             Group.from_values([3, 0]),
-#         ],
-#     )
-#     |> unique_in_row
-#     == Board.new(
-#         [
-#             Group.new(
-#                 [
-#                     Cell.new([4]),
-#                     Cell.new([1, 2, 5, 6, 7, 8, 9]),
-#                     Cell.new([3]),
-#                 ],
-#             ),
-#             Group.new(
-#                 [
-#                     Cell.new([3]),
-#                     Cell.new([1, 2, 4, 5, 6, 7, 8, 9]),
-#                 ],
-#             ),
-#         ],
-#     )
+expect
+    board =
+        [
+            [3, 0, 0, 1, 0, 0, 8, 0, 5],
+            [0, 0, 0, 9, 0, 0, 7, 2, 0],
+            [0, 0, 6, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 8],
+            [0, 2, 0, 4, 8, 7, 0, 0, 0],
+            [0, 7, 0, 0, 0, 1, 0, 0, 0],
+            [2, 3, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 5, 0, 0, 9, 0, 4, 0],
+            [4, 0, 0, 0, 0, 0, 2, 0, 1],
+        ]
+        |> List.map(Group.from_values)
+        |> Board.new
+
+    # none of these transforms should be able to solve the board; they just eliminate
+    # candidates. so the string representation of the board should be identical for all
+    # of them.
+    expected =
+        """
+        3 · ·│1 · ·│8 · 5
+        · · ·│9 · ·│7 2 ·
+        · · 6│· · ·│· · ·
+        ─────┼─────┼─────
+        · · ·│· · ·│· · 8
+        · 2 ·│4 8 7│· · ·
+        · 7 ·│· · 1│· · ·
+        ─────┼─────┼─────
+        2 3 ·│· · ·│· · ·
+        · · 5│· · 9│· 4 ·
+        4 · ·│· · ·│2 · 1
+        """
+
+    transforms = [Board.rows, Board.cols, Board.boxes] |> List.map(unique_in_group)
+    transforms
+    |> List.map(|transform| transform(board))
+    |> List.map(|transformed_board| dbg Board.to_str(transformed_board))
+    |> List.map(|actual| actual == expected)
+    |> List.all(|result| result)

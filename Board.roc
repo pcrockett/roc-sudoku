@@ -5,6 +5,7 @@ module [
     cells,
     col,
     cols,
+    from_boxes,
     from_cols,
     from_rows,
     row,
@@ -68,6 +69,75 @@ expect
     3 6 9│· · ·│· · ·
     3 6 9│· · ·│· · ·
     3 6 9│· · ·│· · ·
+    """
+
+from_boxes : List Group -> Board
+from_boxes = |boxes_list|
+    box_pattern = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+    ]
+    get_row_from_boxes = |row_index|
+        box_indexes : List U64
+        box_indexes =
+            when
+                (
+                    box_pattern
+                    |> List.keep_if(|sublist| List.contains(sublist, row_index))
+                )
+            is
+                [sublist] -> sublist
+                _ -> crash "row_index ${Num.to_str(row_index)} is not valid"
+
+        row_relative_to_box = row_index % 3
+        box_indexes
+        |> List.map(|i| List.get(boxes_list, i) ?? crash "Unexpected box index: ${Num.to_str(i)}")
+        |> List.join_map(
+            |the_box|
+                [0, 1, 2]
+                |> List.map(
+                    |offset|
+                        Group.get(the_box, (row_relative_to_box * 3) + offset),
+                ),
+        )
+    @Board(
+        {
+            cells: List.range({ start: At(0), end: At(8), step: 1 })
+            |> List.join_map(get_row_from_boxes),
+        },
+    )
+
+expect
+    result =
+        [
+            [1, 1, 1, 2, 2, 2, 3, 3, 3], # each "row" here is actually a box
+            [4, 4, 4, 5, 5, 5, 6, 6, 6],
+            [7, 7, 7, 8, 8, 8, 9, 9, 9],
+            [1, 1, 1, 2, 2, 2, 3, 3, 3],
+            [4, 4, 4, 5, 5, 5, 6, 6, 6],
+            [7, 7, 7, 8, 8, 8, 9, 9, 9],
+            [1, 1, 1, 2, 2, 2, 3, 3, 3],
+            [4, 4, 4, 5, 5, 5, 6, 6, 6],
+            [7, 7, 7, 8, 8, 8, 9, 9, 9],
+        ]
+        |> List.map(Group.from_values)
+        |> from_boxes
+        |> to_str
+    result
+    ==
+    """
+    1 1 1│4 4 4│7 7 7
+    2 2 2│5 5 5│8 8 8
+    3 3 3│6 6 6│9 9 9
+    ─────┼─────┼─────
+    1 1 1│4 4 4│7 7 7
+    2 2 2│5 5 5│8 8 8
+    3 3 3│6 6 6│9 9 9
+    ─────┼─────┼─────
+    1 1 1│4 4 4│7 7 7
+    2 2 2│5 5 5│8 8 8
+    3 3 3│6 6 6│9 9 9
     """
 
 row : Board, U64 -> Group

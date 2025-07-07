@@ -33,7 +33,7 @@ main! = |_args|
     transforms = [
         unique_in_group(Board.rows, Board.from_rows),
         unique_in_group(Board.cols, Board.from_cols),
-        # unique_in_group(Board.boxes),
+        unique_in_group(Board.boxes, Board.from_boxes),
     ]
 
     transformed_board : Board
@@ -128,7 +128,7 @@ expect
     transforms = [
         unique_in_group(Board.rows, Board.from_rows),
         unique_in_group(Board.cols, Board.from_cols),
-        # unique_in_group(Board.boxes, Board.from_boxes),
+        unique_in_group(Board.boxes, Board.from_boxes),
     ]
 
     transforms

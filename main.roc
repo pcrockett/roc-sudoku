@@ -6,8 +6,6 @@ import Cell exposing [Cell]
 import Group
 import Board exposing [Board]
 
-Transform : Board -> Board
-
 main! : List Arg => Result {} _
 main! = |_args|
     board =
@@ -29,20 +27,13 @@ main! = |_args|
 
     Stdout.line!("\nSolving...\n")?
 
-    transforms : List Transform
-    transforms = [
-        unique_in_group(Board.rows, Board.from_rows),
-        unique_in_group(Board.cols, Board.from_cols),
-        unique_in_group(Board.boxes, Board.from_boxes),
-    ]
-
-    transformed_board : Board
     transformed_board =
-        transforms
-        |> List.walk(
-            board,
-            |b, transform| transform(b),
-        )
+        [
+            unique_in_group(Board.rows, Board.from_rows),
+            unique_in_group(Board.cols, Board.from_cols),
+            unique_in_group(Board.boxes, Board.from_boxes),
+        ]
+        |> solve(board)
 
     transformed_board
     |> Board.to_str
@@ -62,6 +53,19 @@ main! = |_args|
         |> List.len
         |> Num.to_str
     Stdout.line!("Solved cells: ${known_cells}")
+
+solve = |transforms, board|
+    transformed_board : Board
+    transformed_board =
+        transforms
+        |> List.walk(
+            board,
+            |b, transform| transform(b),
+        )
+    if transformed_board == board then
+        transformed_board
+    else
+        solve(transforms, transformed_board)
 
 to_eliminate : List Cell -> U64
 to_eliminate = |cells|

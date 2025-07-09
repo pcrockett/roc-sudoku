@@ -11,7 +11,7 @@ module [
 
 import Cell exposing [Cell]
 
-Group := List Cell implements [Eq, Inspect]
+Group := List Cell implements [Eq, Inspect, Hash]
 
 new : List Cell -> Group
 new = |cell_list| @Group(cell_list)

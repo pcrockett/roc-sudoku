@@ -140,3 +140,30 @@ expect
     |> List.map(Board.to_str)
     |> List.map(|actual| actual == expected)
     |> List.all(|result| result)
+
+identical_cells = |group_func, reassemble_func|
+    transform = |board|
+
+        insert_index = |dict, (cell, index)|
+            dict
+            |> Dict.insert(
+                cell,
+                when Dict.get(dict, cell) is
+                    Err(KeyNotFound) -> [index]
+                    Ok(list) -> List.append(list, index),
+            )
+
+        board
+        |> group_func
+        |> List.map(
+            |grp|
+                cell_lookup =
+                    grp
+                    |> List.map_with_index(|cell, index| (cell, index))
+                    |> List.walk(Dict.empty({}), insert_index)
+                # TODO: find entries in the dict where the len(key_candidates) == len(value)
+                grp,
+        )
+        |> reassemble_func
+    transform
+
